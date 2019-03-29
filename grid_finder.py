@@ -381,11 +381,12 @@ def find_lines(edges, min_line_length=200):
                                 minLineLength=min_line_length, maxLineGap=10)
         if lines is not None:
             try:
-                find_orthogonal_lines(lines)
+                hv_lines = np.asarray([l for l in lines if abs(l[0][0]-l[0][2]) < 1 or abs(l[0][1]-l[0][3]) < 1])
+                # find_orthogonal_lines(lines)
             except GridFinderException:
                 pass
             else:
-                return lines
+                return hv_lines
         min_line_length /= 2
     raise GridFinderException("No lines found")
 
@@ -563,10 +564,21 @@ def _main():
     if args.imwrite:
         write_grid_in_file(img, grid, args.imwrite)
     if args.verbose:
+        print(img.shape)
+        row_count = len(grid.all_x)
+        if row_count*grid.xpattern.step+grid.xpattern.start > img.shape[0]:
+            row_count -= 1
+        col_count = len(grid.all_y)
+        if col_count*grid.ypattern.step+grid.ypattern.start > img.shape[1]:
+            col_count -= 1
         print('First column at:', grid.xpattern.start)
         print('First row at:', grid.ypattern.start)
         print('Column width:', grid.xpattern.step)
         print('Row width:', grid.ypattern.step)
+        print('Column count:', col_count)
+        print('Row count:', row_count)
+        print('Image height:', row_count * grid.xpattern.step)
+        print('Image width:', col_count * grid.ypattern.step)
 
 if __name__ == '__main__':
     _main()
